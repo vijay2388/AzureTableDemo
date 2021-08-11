@@ -1,0 +1,128 @@
+//Creating Table
+
+private static string connection_string = "DefaultEndpointsProtocol=https;AccountName=appstore2000;AccountKey=8pBdEmCXm/Gv8iZ1LoC0+SZVkzWSq81C3/Quzr9rYk+xigMs4t5mBYC08cptZnR4UyLCHYLlamVfo8IV99GvbA==;EndpointSuffix=core.windows.net";
+        private static string table_name = "customer";
+        static void Main(string[] args)
+        {
+            CloudStorageAccount _account = CloudStorageAccount.Parse(connection_string);
+
+            CloudTableClient _client = _account.CreateCloudTableClient();
+
+            CloudTable _table= _client.GetTableReference(table_name);
+            _table.CreateIfNotExists();
+
+            Console.WriteLine("Table created");
+            Console.ReadKey();
+        }
+		
+---------------------------------------------------------------------------------------------------
+//Adding a Record
+
+class Customer :TableEntity
+    {
+        public string customername { get; set; }
+        public Customer(string _customername, string _city,string _customerid)
+        {
+            PartitionKey = _city;
+            RowKey = _customerid;
+            customername = _customername;
+        }
+    }
+-------------------------------------------------------------------------------------------------------
+ CloudStorageAccount _account = CloudStorageAccount.Parse(connection_string);
+
+            CloudTableClient _table_client = _account.CreateCloudTableClient();
+
+            CloudTable _table=_table_client.GetTableReference(table_name);
+
+            Customer _customer = new Customer("UserA", "Chicago", "C1");
+
+            TableOperation _operation = TableOperation.Insert(_customer);
+
+            TableResult _result=_table.Execute(_operation);
+
+            Console.WriteLine("Entity is added");
+
+            Console.ReadKey();
+------------------------------------------------------------------------------------------------------
+//Bulk Operation
+
+            CloudStorageAccount _account = CloudStorageAccount.Parse(connection_string);
+
+            CloudTableClient _table_client = _account.CreateCloudTableClient();
+
+            CloudTable _table = _table_client.GetTableReference(table_name);
+
+            List<Customer> _customers = new List<Customer>()
+            {
+            new Customer("UserB", "Chicago", "C2"),
+            new Customer("UserC", "Chicago", "C3"),
+            new Customer("UserD", "Chicago", "C4"),
+            };
+
+            TableBatchOperation _operation = new TableBatchOperation();
+            foreach (Customer _customer in _customers)
+                _operation.Insert(_customer);
+
+
+            TableBatchResult _result = _table.ExecuteBatch(_operation);
+
+            Console.WriteLine("Entities are added");
+
+            Console.ReadKey();
+-----------------------------------------------------------------------------------------------
+ //Searching Customer
+ 
+ private static string connection_string = "DefaultEndpointsProtocol=https;AccountName=newstore100000;AccountKey=sLc9uOkHloYRuuW3SBI8sFP4f1IzBLbZsrYH/XgDE6EBooz3bHG5CtO0MCga/goWN9yhBhUS5OfZeqOyM/CZNQ==;EndpointSuffix=core.windows.net";
+        private static string table_name = "Customer";
+        private static string partition_key = "Chicago";
+        private static string row_key = "C2";
+
+        static void Main(string[] args)
+        {
+            CloudStorageAccount _account = CloudStorageAccount.Parse(connection_string);
+
+            CloudTableClient _table_client = _account.CreateCloudTableClient();
+
+            CloudTable _table = _table_client.GetTableReference(table_name);
+
+            TableOperation _operation = TableOperation.Retrieve<Customer>(partition_key, row_key);
+
+            TableResult _result = _table.Execute(_operation);
+
+            Customer _customer = _result.Result as Customer;
+
+
+            Console.WriteLine($"The customer name is {_customer.customername}");
+            Console.WriteLine($"The customer city is {_customer.PartitionKey}");
+            Console.WriteLine($"The customer id is {_customer.RowKey}");
+
+            Console.ReadKey();
+        }
+-----------------------------------------------------------------------------------------------------
+ //Updating Customer
+ 
+ private static string connection_string = "DefaultEndpointsProtocol=https;AccountName=newstore100000;AccountKey=sLc9uOkHloYRuuW3SBI8sFP4f1IzBLbZsrYH/XgDE6EBooz3bHG5CtO0MCga/goWN9yhBhUS5OfZeqOyM/CZNQ==;EndpointSuffix=core.windows.net";
+        private static string table_name = "Customer";
+        private static string partition_key = "Chicago";
+        private static string row_key = "C2";
+
+        static void Main(string[] args)
+        {
+            CloudStorageAccount _account = CloudStorageAccount.Parse(connection_string);
+
+            CloudTableClient _table_client = _account.CreateCloudTableClient();
+
+            CloudTable _table = _table_client.GetTableReference(table_name);
+
+            Customer _customer = new Customer("UserE", partition_key, row_key);
+
+
+            TableOperation _operation = TableOperation.InsertOrMerge(_customer);
+
+            TableResult _result = _table.Execute(_operation);
+
+            Console.WriteLine("Customer information is updated");
+            
+            Console.ReadKey();
+        }
